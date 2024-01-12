@@ -1,0 +1,159 @@
+
+Respostas 
+
+Questão 1:
+
+Premissas Adotadas:
+
+1.Design Responsivo: Presume-se que o design do aplicativo seja responsivo em diferentes tamanhos de tela e dispositivos.
+
+2.Valores Iniciais: Garantir que o saldo inicial seja de R$200,00 para os testes relacionados ao saldo.
+
+3.Conexão com Servidor: Assumir uma conexão estável com o servidor para realizar transferências e atualizações de saldo.
+
+4.Comportamento Padrão dos Botões: Presume-se que o botão "Transferir" realiza a transferência e o botão "Cancelar" interrompe a operação sem efetivar a transferência.
+
+5. Requisitos de Sistema: Certificar-se de que o dispositivo possui os requisitos mínimos necessários para o funcionamento do aplicativo.
+
+	Cenários de Teste:
+1.Visualização Inicial:
+Garantir que o título esteja centralizado e em azul.
+Verificar se o subtítulo "Transferência de VarKoers Correntistas" está exibido corretamente.
+Confirmar que o valor do saldo (R$200,00) está alinhado à direita.
+
+2.Campos de Input:
+Testar se os campos de input para destinatário, valor e data da efetivação estão visíveis.
+Validar se os campos de input estão funcionando corretamente para inserção de dados.
+
+3.Espaçamento:
+Verificar se há um espaço de duas linhas em branco após as informações iniciais.
+
+4.Botões:
+Testar se os botões "Transferir" e "Cancelar" estão visíveis.
+Garantir que os botões estão clicáveis e executam as ações corretas.
+
+5.Transferência Bem-Sucedida:
+Simular uma transferência bem-sucedida e verificar se o saldo é atualizado corretamente.
+Confirmar se uma mensagem de confirmação é exibida após a transferência.
+
+6.Transferência com Valor Zero/Negativo:
+Tentar realizar uma transferência com valor zero ou negativo.
+Verificar se o sistema impede a transação e fornece uma mensagem apropriada.
+
+7.Campos Obrigatórios:
+Tentar enviar a transferência sem preencher algum dos campos obrigatórios (destinatário, valor, data).
+Confirmar se o sistema exibe mensagens de erro para os campos não preenchidos.
+
+8.Cancelamento de Transferência:
+Testar o botão "Cancelar" e verificar se a operação é interrompida sem efetivar a transferência.
+
+9.formato da Data:
+Inserir uma data com formato inválido e verificar se o sistema valida corretamente.
+
+
+QUESTÃO 2:
+-Entidades fortes: professor, aluno; 
+-Entidades fracas: disciplica; Relacionamentos: um professor leciona vários Disciplinas, várias disciplinas sao cursadas por vários alunos. 
+-atributo de professor: primarykey. Cod.professor, nome professor,fone 
+-atributo Disciplina: primarykey cod.disciplina, nome disc, Foreing Key cod.Pprofessor, Foreing Cod.aluno 
+-Atributo aluno_disciplina: Foreing Cod.aluno, Foreing cod.disciplina, Ano 
+-Atributo aluno: primarykey, cod.aluno, Nome aluno 
+
+SQL
+Script
+-- Tabela Professor
+CREATE TABLE Professor (
+    CodProfessor INT PRIMARY KEY,
+    NomeProfessor VARCHAR(255),
+    Fone VARCHAR(15)
+);
+
+-- Tabela Disciplina
+CREATE TABLE Disciplina (
+    CodDisciplina INT PRIMARY KEY,
+    NomeDisciplina VARCHAR(255),
+    CodProfessor INT,
+    FOREIGN KEY (CodProfessor) REFERENCES Professor(CodProfessor)
+);
+
+-- Tabela Aluno
+CREATE TABLE Aluno (
+    CodAluno INT PRIMARY KEY,
+    NomeAluno VARCHAR(255)
+);
+
+-- Tabela Aluno_Disciplina
+CREATE TABLE Aluno_Disciplina (
+    CodAluno INT,
+    CodDisciplina INT,
+    Ano INT,
+    PRIMARY KEY (CodAluno, CodDisciplina),
+    FOREIGN KEY (CodAluno) REFERENCES Aluno(CodAluno),
+    FOREIGN KEY (CodDisciplina) REFERENCES Disciplina(CodDisciplina)
+);
+
+INSERT
+-- Inserindo dados na tabela Professor
+INSERT INTO Professor (CodProfessor, NomeProfessor, Fone) VALUES
+(1, 'Professor1', '123-456-7890'),
+(2, 'Professor2', '987-654-3210'),
+(3, 'Professor3', '111-222-3333'),
+(4, 'Professor4', '444-555-6666');
+
+-- Inserindo dados na tabela Disciplina
+INSERT INTO Disciplina (CodDisciplina, NomeDisciplina, CodProfessor) VALUES
+(101, 'Disciplina1', 1),
+(102, 'Disciplina2', 2),
+(103, 'Disciplina3', 3),
+(104, 'Disciplina4', 4);
+
+-- Inserindo dados na tabela Aluno
+INSERT INTO Aluno (CodAluno, NomeAluno) VALUES
+(1001, 'Aluno1'),
+(1002, 'Aluno2'),
+(1003, 'Aluno3'),
+(1004, 'Aluno4');
+
+-- Inserindo dados na tabela Aluno_Disciplina
+INSERT INTO Aluno_Disciplina (CodAluno, CodDisciplina, Ano) VALUES
+(1001, 101, 2022),
+(1002, 102, 2022),
+(1003, 103, 2022),
+(1004, 104, 2022);
+
+
+SELECT
+
+SELECT A.NomeAluno
+FROM Aluno A
+JOIN Aluno_Disciplina AD ON A.CodAluno = AD.CodAluno
+JOIN Disciplina D ON AD.CodDisciplina = D.CodDisciplina
+JOIN Professor P ON D.CodProfessor = P.CodProfessor
+WHERE P.CodProfessor = 3 AND D.NomeDisciplina = 'Disciplina2';
+
+
+SELECT D.NomeDisciplina, COUNT(AD.CodAluno) AS QuantidadeDeAlunos
+FROM Disciplina D
+JOIN Aluno_Disciplina AD ON D.CodDisciplina = AD.CodDisciplina
+GROUP BY D.NomeDisciplina;
+
+SELECT D.NomeDisciplina
+FROM Disciplina D
+JOIN Professor P ON D.CodProfessor = P.CodProfessor
+WHERE NOT EXISTS (
+    SELECT A.CodProfessor
+    FROM Professor A
+    WHERE NOT EXISTS (
+        SELECT *
+        FROM Disciplina B
+        WHERE B.CodProfessor = A.CodProfessor AND B.CodDisciplina = D.CodDisciplina
+    )
+);
+
+SELECT COUNT(*) AS TotalDeProfessores
+FROM Professor;
+
+SELECT DISTINCT A.CodAluno, A.NomeAluno
+FROM Aluno A
+JOIN Aluno_Disciplina AD ON A.CodAluno = AD.CodAluno
+WHERE AD.Ano BETWEEN 2000 AND 2020;
